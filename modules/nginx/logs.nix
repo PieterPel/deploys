@@ -2,6 +2,7 @@
 
 let
   nginxProxy = import ../../helpers/nginx-proxy.nix;
+  ipaddress = config.hosts.${config.networking.hostName}.ip;
 in
 lib.mkIf config.hostLogs (
   lib.mkMerge [
@@ -9,26 +10,26 @@ lib.mkIf config.hostLogs (
       inherit lib config;
       name = "grafana";
       port = config.grafanaPort;
-      ip = config.logHosterIpaddress;
+      ip = ipaddress;
       websockets = true;
     })
     (nginxProxy {
       inherit lib config;
       name = "prometheus";
       port = config.prometheusPort;
-      ip = config.logHosterIpaddress;
+      ip = ipaddress;
     })
     (nginxProxy {
       inherit lib config;
       name = "loki";
       port = config.lokiListenPort;
-      ip = config.logHosterIpaddress;
+      ip = ipaddress;
     })
     (nginxProxy {
       inherit lib config;
       name = "promtail";
-      port = config.promptailListenPort;
-      ip = config.logHosterIpaddress;
+      port = config.promtailListenPort;
+      ip = ipaddress;
     })
   ]
 )

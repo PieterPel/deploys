@@ -1,8 +1,7 @@
 { config, ... }:
 
 let
-  pushIpaddress =
-    if config.hostLogs then "127.0.0.1" else config.hosts.${config.logsHoster}.ip;
+  pushIpaddress = if config.hostLogs then "127.0.0.1" else config.hosts.${config.logsHoster}.ip;
 in
 {
   services.promtail = {
@@ -27,7 +26,7 @@ in
             max_age = "12h";
             labels = {
               job = "systemd-journal";
-              host = config.networking.hostname;
+              host = config.networking.hostName;
             };
           };
           relabel_configs = [

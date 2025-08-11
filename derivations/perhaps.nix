@@ -1,18 +1,10 @@
-{ self
-, nixpkgs
-, dotfiles
-, deploy-rs
-, hostname
+{ nixpkgs
+, system
 , compose2nix
 , perhaps
 , ...
 }:
 let
-  systemHelpers = import ../helpers/system.nix {
-    inherit self dotfiles deploy-rs;
-  };
-
-  system = systemHelpers.getSystem hostname;
 
   pkgs = nixpkgs.legacyPackages.${system};
 

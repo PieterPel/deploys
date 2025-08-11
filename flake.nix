@@ -31,19 +31,21 @@
         deploy-rs = inputs.deploy-rs;
       };
 
+      platforms = {
+        nixberry = "aarch64-linux";
+      };
+
       hosts = {
-        nixberry = helpers.mkHost "nixberry" [
+        nixberry = helpers.mkHost "nixberry" platforms.nixberry [
           ./modules
         ];
       };
 
       perhaps = import ./derivations/perhaps.nix {
-        inherit self;
         nixpkgs = inputs.nixpkgs;
-        dotfiles = inputs.dotfiles;
-        deploy-rs = inputs.deploy-rs;
+        system = platforms.nixberry;
         compose2nix = inputs.compose2nix;
-        hostname = "nixberry";
+        perhaps = inputs.perhaps;
       };
 
       preCommitChecks = forAllSystems (system: {
@@ -76,15 +78,18 @@
     {
       # General setup for all our hosts
       nixosConfigurations = builtins.mapAttrs (_: host: host.nixosConfiguration) hosts;
-      deploy.nodes = builtins.mapAttrs (_: host: host.deployNode) hosts;
 
-      # Define what should be deployed where using profiles
-      deploys.nodes.nixberry.profiles.perhaps = helpers.mkProfile "nixberry" {
-        user = "perhaps";
-        package = perhaps.package;
-      };
+      deploy.nodes =
+        # The default for all nodes
+        (builtins.mapAttrs (_: host: host.deployNode) hosts) // {
+          # Per profile deploy
+          nixberry.profiles.perhaps = helpers.mkProfile "nixberry" "aarch64-linux" {
+            user = "perhaps";
+            package = perhaps.package;
+          };
+        };
 
-      # Combine pre-commit and eploy-rs checks
+      # Combine pre-commit and deploy-rs checks
       checks = inputs.nixpkgs.lib.recursiveUpdate preCommitChecks deployChecks;
 
       # devShells for all systems

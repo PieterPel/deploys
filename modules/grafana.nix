@@ -1,32 +1,46 @@
 { config, ... }:
+
+let
+  ipaddress = config.hosts.${config.networking.hostName}.ip;
+in
 {
   services.grafana = {
-    port = config.grafanaPort;
-    # WARNING: this should match nginx setup!
-    # prevents "Request origin is not authorized"
-    rootUrl = "http://${config.ipaddress}:${toString config.grafanaPort}"; # helps with nginx / ws / live
-
-    protocol = "http";
-    addr = "127.0.0.1";
-    analytics.reporting.enable = false;
     enable = config.hostLogs;
 
+    # grafana.ini settings
+    settings = {
+      analytics.reporting_enabled = false;
+
+      server = {
+        http_port = config.grafanaPort;
+        http_addr = "127.0.0.1";
+        protocol = "http";
+        # WARNING: this should match nginx setup!
+        # prevents "Request origin is not authorized"
+        root_url = "http://${ipaddress}:${toString config.grafanaPort}";
+      };
+    };
+
+    # provisioning YAML
     provision = {
       enable = true;
-      datasources = [
-        {
-          name = "Prometheus";
-          type = "prometheus";
-          access = "proxy";
-          url = "http://127.0.0.1:${toString config.prometheusPort}";
-        }
-        {
-          name = "Loki";
-          type = "loki";
-          access = "proxy";
-          url = "http://127.0.0.1:${toString config.lokiListenPort}";
-        }
-      ];
+      datasources.settings = {
+        apiVersion = 1;
+        datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            access = "proxy";
+            url = "http://127.0.0.1:${toString config.prometheusPort}";
+          }
+          {
+            name = "Loki";
+            type = "loki";
+            access = "proxy";
+            url = "http://127.0.0.1:${toString config.lokiListenPort}";
+          }
+        ];
+      };
     };
   };
 }
