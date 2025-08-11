@@ -8,7 +8,8 @@
     ./prometheus.nix
     ./promtail.nix
     ./nginx
-    ./users.nix
+    ./app-users.nix
+    ./deploy-user.nix
     ./host-data.nix
   ];
 }

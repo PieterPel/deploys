@@ -15,7 +15,7 @@ let
     compose2nix = compose2nixPackage;
   };
 
-  composeFile = perhaps.outPath + "docker-compose.yml";
+  composeFile = "${perhaps.outPath}/docker-compose.yml";
 in
 {
   package = composeHelpers.mkComposeApp {

@@ -1,33 +1,42 @@
 { self
 , dotfiles
 , deploy-rs
+, platforms
 ,
 }:
 let
-  mkHost = hostname: system: modules: {
+  mkHost = hostname: modules: {
     nixosConfiguration = dotfiles.nixosConfigurations.${hostname}.extendModules {
       inherit modules;
     };
     deployNode = {
-      inherit hostname;
+      # inherit hostname;
+      hostname = "192.168.178.101";
       profiles.system = {
         user = "root";
-        path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostname};
+        sshUser = "deploy";
+        path = deploy-rs.lib.${platforms.${hostname}}.activate.nixos self.nixosConfigurations.${hostname};
       };
     };
   };
 
   mkProfile =
-    hostname: system:
-    { user
+    { hostname
+    , user
     , package
+    , sshUser ? "deploy"
     , script ? "./bin/start"
     , profilePath ? null
     ,
     }:
+    let
+      system = platforms.${hostname};
+    in
     {
       inherit user;
+      inherit sshUser;
       path = deploy-rs.lib.${system}.activate.custom package script;
+      remoteBuild = system != "x86_64-linux";
     }
     // (if profilePath != null then { inherit profilePath; } else { });
 in

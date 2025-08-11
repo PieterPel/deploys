@@ -25,18 +25,18 @@
     { self, ... }@inputs:
 
     let
-      helpers = import ./helpers/system.nix {
-        inherit self;
-        dotfiles = inputs.dotfiles;
-        deploy-rs = inputs.deploy-rs;
-      };
-
       platforms = {
         nixberry = "aarch64-linux";
       };
 
+      helpers = import ./helpers/system.nix {
+        inherit self platforms;
+        dotfiles = inputs.dotfiles;
+        deploy-rs = inputs.deploy-rs;
+      };
+
       hosts = {
-        nixberry = helpers.mkHost "nixberry" platforms.nixberry [
+        nixberry = helpers.mkHost "nixberry" [
           ./modules
         ];
       };
@@ -74,20 +74,23 @@
 
       forAllSystems = inputs.nixpkgs.lib.genAttrs supportedSystems;
 
+      lib = inputs.nixpkgs.lib;
     in
     {
       # General setup for all our hosts
       nixosConfigurations = builtins.mapAttrs (_: host: host.nixosConfiguration) hosts;
 
-      deploy.nodes =
-        # The default for all nodes
-        (builtins.mapAttrs (_: host: host.deployNode) hosts) // {
-          # Per profile deploy
-          nixberry.profiles.perhaps = helpers.mkProfile "nixberry" "aarch64-linux" {
-            user = "perhaps";
-            package = perhaps.package;
+      deploy.nodes = lib.recursiveUpdate (builtins.mapAttrs (_: host: host.deployNode) hosts) {
+        nixberry = lib.recursiveUpdate (hosts.nixberry.deployNode) {
+          profiles = {
+            perhaps = helpers.mkProfile {
+              hostname = "nixberry";
+              user = "perhaps";
+              package = perhaps.package;
+            };
           };
         };
+      };
 
       # Combine pre-commit and deploy-rs checks
       checks = inputs.nixpkgs.lib.recursiveUpdate preCommitChecks deployChecks;
@@ -102,5 +105,7 @@
 
       # And add a formatter
       formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
+
+      perhaps = perhaps; # NOTE: may as well do this
     };
 }
