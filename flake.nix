@@ -9,38 +9,36 @@
     perhaps = {
       url = "github:PieterPel/perhaps";
     };
+    compose2nix = {
+      url = "github:aksiksi/compose2nix";
+      inputs.nixpkgs.follow = "nixpkgs";
+    };
   };
 
   outputs =
     { self, ... }@inputs:
 
     let
-      getSystem = hostname: inputs.dotfiles.nixosConfigurations.${hostname}.system;
+      hostIpaddress = "192.168.1.10";
 
-      mkHost = hostname: modules: {
-        nixosConfiguration = inputs.dotfiles.nixosConfigurations.${hostname}.extendModules {
-          inherit modules;
-        };
-        deployNode = {
-          inherit hostname;
-          profiles.system = {
-            user = "root";
-            path =
-              inputs.deploy-rs.lib.${getSystem hostname}.activate.nixos
-                self.nixosConfigurations.${hostname};
-          };
-        };
-      };
+      helpers = import ./helpers/system.nix { inherit self inputs; };
 
       hosts = {
-        nixberry = mkHost "nixberry" [ ];
+        nixberry = helpers.mkHost "nixberry" [
+          ./modules
+          {
+            hostLogs = true;
+            logHosterIpaddress = hostIpaddress;
+            ipadddress = hostIpaddress;
+          }
+        ];
       };
 
-      mkProfile = hostname: { user, package, script ? "./bin/start", profilePath ? null }: 
-        {
-          inherit user;
-          path = inputs.deploy-rs.lib.${getSystem hostname}.activate.custom package script;
-        } // (if profilePath != null then { inherit profilePath; } else {});
+      perhaps = import ./derivations/perhaps.nix {
+        inherit self inputs;
+        hostname = "nixberry";
+      };
+
     in
     {
       # General setup for all our hosts
@@ -48,9 +46,9 @@
       deploy.nodes = builtins.mapAttrs (_: host: host.deployNode) hosts;
 
       # Define what should be deployed where using profiles
-      deploys.nodes.nixberry.profiles.perhaps = mkProfile "nixberry" {
+      deploys.nodes.nixberry.profiles.perhaps = helpers.mkProfile "nixberry" {
         user = "root";
-        package = inputs.perhaps;
+        package = perhaps.package;
       };
 
       # Inbuilt checks by deploy-rs
