@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ pkgs, compose2nix }:
 
 {
   mkComposeApp =

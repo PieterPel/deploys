@@ -1,0 +1,60 @@
+{
+  inputs = {
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+    };
+    dotfiles = {
+      url = "github:PieterPel/dotfiles";
+    };
+    perhaps = {
+      url = "github:PieterPel/perhaps";
+    };
+
+    compose2nix = {
+      url = "github:aksiksi/compose2nix";
+      inputs.nixpkgs.follow = "nixpkgs";
+    };
+  };
+
+  outputs =
+    { self, ... }@inputs:
+
+    let
+      hostIpaddress = "192.168.1.10";
+
+      helpers = import ./helpers/system.nix { inherit self inputs; };
+
+      hosts = {
+        nixberry = helpers.mkHost "nixberry" [
+          ./modules
+          {
+            hostLogs = true;
+            logHosterIpaddress = hostIpaddress;
+            ipadddress = hostIpaddress;
+          }
+        ];
+      };
+
+      perhaps = import ./derivations/perhaps.nix {
+        inherit self inputs;
+        hostname = "nixberry";
+      };
+
+    in
+    {
+      # General setup for all our hosts
+      nixosConfigurations = builtins.mapAttrs (_: host: host.nixosConfiguration) hosts;
+      deploy.nodes = builtins.mapAttrs (_: host: host.deployNode) hosts;
+
+      # Define what should be deployed where using profiles
+      deploys.nodes.nixberry.profiles.perhaps = helpers.mkProfile "nixberry" {
+        user = "root";
+        package = perhaps.package;
+      };
+
+      # Inbuilt checks by deploy-rs
+      checks = builtins.mapAttrs (
+        system: deployLib: deployLib.deployChecks self.deploy
+      ) inputs.deploy-rs.lib;
+    };
+}
