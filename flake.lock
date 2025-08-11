@@ -239,11 +239,11 @@
         "stylix": "stylix"
       },
       "locked": {
-        "lastModified": 1754843456,
-        "narHash": "sha256-h+7ySrsYVpdHeY8olpCohRQdPhgYIJ4HrtRPdDu3Mj4=",
+        "lastModified": 1754924405,
+        "narHash": "sha256-tq3xE3VG5U3Gg7v/X886QlYN+IxNqE/aBuCyzlsrlu0=",
         "owner": "PieterPel",
         "repo": "dotfiles",
-        "rev": "d09436eb9ee7d5f13fb26d7ec013a9ae5c4dc9e2",
+        "rev": "8106a9aaee9a6d5b46e36ed271fd360518ec1ded",
         "type": "github"
       },
       "original": {

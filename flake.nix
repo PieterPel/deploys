@@ -25,7 +25,11 @@
     { self, ... }@inputs:
 
     let
-      hostIpaddress = "192.168.1.10";
+      hostsData = {
+        nixberry = {
+          ip = "192.168.1.10";
+        };
+      };
 
       helpers = import ./helpers/system.nix { inherit self inputs; };
 
@@ -33,9 +37,10 @@
         nixberry = helpers.mkHost "nixberry" [
           ./modules
           {
-            hostLogs = true;
-            logHosterIpaddress = hostIpaddress;
-            ipadddress = hostIpaddress;
+            hosts = hostsData;
+            logsHoster = "nixberry";
+            # perhapsHoster = "nixberry";
+            perhapsHoster = "alsdfjalksfj";
           }
         ];
       };
@@ -79,7 +84,7 @@
 
       # Define what should be deployed where using profiles
       deploys.nodes.nixberry.profiles.perhaps = helpers.mkProfile "nixberry" {
-        user = "root";
+        user = "perhaps";
         package = perhaps.package;
       };
 
@@ -93,5 +98,8 @@
           buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
         };
       });
+
+      # And add a formatter
+      formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
     };
 }

@@ -6,7 +6,8 @@
     ./prometheus.nix
     ./grafana.nix
     ./prometheus.nix
-    ./promptail.nix
+    ./promtail.nix
     ./nginx
+    ./users.nix
   ];
 }

@@ -4,7 +4,7 @@
     port = config.grafanaPort;
     # WARNING: this should match nginx setup!
     # prevents "Request origin is not authorized"
-    rootUrl = "http://${config.ipaddress}:8010"; # helps with nginx / ws / live
+    rootUrl = "http://${config.ipaddress}:${toString config.grafanaPort}"; # helps with nginx / ws / live
 
     protocol = "http";
     addr = "127.0.0.1";

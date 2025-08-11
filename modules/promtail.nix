@@ -1,7 +1,8 @@
 { config, ... }:
 
 let
-  pushIpaddress = if config.hostLogs then "127.0.0.1" else config.logHosterIpaddress;
+  pushIpaddress =
+    if config.hostLogs then "127.0.0.1" else config.hosts.${config.logsHoster}.ip;
 in
 {
   services.promtail = {
