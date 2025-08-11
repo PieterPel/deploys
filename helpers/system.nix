@@ -19,11 +19,11 @@ let
 
   mkProfile =
     hostname:
-    {
-      user,
-      package,
-      script ? "./bin/start",
-      profilePath ? null,
+    { user
+    , package
+    , script ? "./bin/start"
+    , profilePath ? null
+    ,
     }:
     {
       inherit user;

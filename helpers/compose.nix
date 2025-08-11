@@ -2,11 +2,11 @@
 
 {
   mkComposeApp =
-    {
-      name,
-      composeFile,
-      runtime ? "podman",
-      dataDir ? "/var/lib/${name}",
+    { name
+    , composeFile
+    , runtime ? "podman"
+    , dataDir ? "/var/lib/${name}"
+    ,
     }:
 
     pkgs.stdenv.mkDerivation {

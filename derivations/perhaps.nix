@@ -1,8 +1,7 @@
-{
-  self,
-  inputs,
-  hostname,
-  ...
+{ self
+, inputs
+, hostname
+, ...
 }:
 let
   systemHelpers = import ../helpers/system.nix { inherit self inputs; };
