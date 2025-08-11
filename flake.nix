@@ -39,8 +39,7 @@
           {
             hosts = hostsData;
             logsHoster = "nixberry";
-            # perhapsHoster = "nixberry";
-            perhapsHoster = "alsdfjalksfj";
+            perhapsHoster = "nixberry";
           }
         ];
       };
