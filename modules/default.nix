@@ -9,5 +9,6 @@
     ./promtail.nix
     ./nginx
     ./users.nix
+    ./host-data.nix
   ];
 }

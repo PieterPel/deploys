@@ -25,27 +25,24 @@
     { self, ... }@inputs:
 
     let
-      hostsData = {
-        nixberry = {
-          ip = "192.168.1.10";
-        };
+      helpers = import ./helpers/system.nix {
+        inherit self;
+        dotfiles = inputs.dotfiles;
+        deploy-rs = inputs.deploy-rs;
       };
-
-      helpers = import ./helpers/system.nix { inherit self inputs; };
 
       hosts = {
         nixberry = helpers.mkHost "nixberry" [
           ./modules
-          {
-            hosts = hostsData;
-            logsHoster = "nixberry";
-            perhapsHoster = "nixberry";
-          }
         ];
       };
 
       perhaps = import ./derivations/perhaps.nix {
-        inherit self inputs;
+        inherit self;
+        nixpkgs = inputs.nixpkgs;
+        dotfiles = inputs.dotfiles;
+        deploy-rs = inputs.deploy-rs;
+        compose2nix = inputs.compose2nix;
         hostname = "nixberry";
       };
 

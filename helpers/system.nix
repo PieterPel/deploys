@@ -1,9 +1,9 @@
-{ self, inputs }:
+{ self, dotfiles, deploy-rs }:
 let
-  getSystem = hostname: inputs.dotfiles.nixosConfigurations.${hostname}.system;
+  getSystem = hostname: dotfiles.nixosConfigurations.${hostname}.system;
 
   mkHost = hostname: modules: {
-    nixosConfiguration = inputs.dotfiles.nixosConfigurations.${hostname}.extendModules {
+    nixosConfiguration = dotfiles.nixosConfigurations.${hostname}.extendModules {
       inherit modules;
     };
     deployNode = {
@@ -11,7 +11,7 @@ let
       profiles.system = {
         user = "root";
         path =
-          inputs.deploy-rs.lib.${getSystem hostname}.activate.nixos
+          deploy-rs.lib.${getSystem hostname}.activate.nixos
             self.nixosConfigurations.${hostname};
       };
     };
@@ -27,7 +27,7 @@ let
     }:
     {
       inherit user;
-      path = inputs.deploy-rs.lib.${getSystem hostname}.activate.custom package script;
+      path = deploy-rs.lib.${getSystem hostname}.activate.custom package script;
     }
     // (if profilePath != null then { inherit profilePath; } else { });
 in

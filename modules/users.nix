@@ -8,7 +8,7 @@ let
   userHelper = import ../helpers/user.nix { inherit lib pkgs; };
 in
 {
-  config = lib.mkIf config.derived.hostPerhaps (
+  config = lib.mkIf config.hostPerhaps (
     userHelper.mkAppUser {
       name = "perhaps";
     }
