@@ -7,5 +7,6 @@
     ./grafana.nix
     ./prometheus.nix
     ./promptail.nix
+    ./nginx
   ];
 }

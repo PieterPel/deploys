@@ -1,11 +1,7 @@
-{ config, ... }:
-{
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    recommendedOptimisation = true;
-    recommendedGzipSettings = true;
+{ lib, config, ... }:
 
+lib.mkIf config.hostLogs {
+  services.nginx = {
     upstreams = {
       "grafana" = {
         servers = {
@@ -30,6 +26,7 @@
     };
 
     virtualHosts.grafana = {
+      serverName = "grafana.local";
       locations."/" = {
         proxyPass = "http://grafana";
         proxyWebsockets = true;
@@ -37,39 +34,40 @@
       listen = [
         {
           addr = config.logHosterIpaddress;
-          port = 8010;
+          port = config.grafanaPort;
         }
       ];
     };
 
     virtualHosts.prometheus = {
+      serverName = "prometheus.local";
       locations."/".proxyPass = "http://prometheus";
       listen = [
         {
           addr = config.logHosterIpaddress;
-          port = 8020;
+          port = config.prometheusPort;
         }
       ];
     };
 
-    # confirm with http://192.168.1.10:8030/loki/api/v1/status/buildinfo
-    #     (or)     /config /metrics /ready
     virtualHosts.loki = {
+      serverName = "loki.local";
       locations."/".proxyPass = "http://loki";
       listen = [
         {
           addr = config.logHosterIpaddress;
-          port = 8030;
+          port = config.lokiListenPort;
         }
       ];
     };
 
     virtualHosts.promtail = {
+      serverName = "promtail.local";
       locations."/".proxyPass = "http://promtail";
       listen = [
         {
           addr = config.logHosterIpaddress;
-          port = 8031;
+          port = config.promptailListenPort;
         }
       ];
     };
