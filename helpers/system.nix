@@ -1,45 +1,61 @@
 { self
-, dotfiles
-, deploy-rs
-, platforms
+, inputs
+, hostname
+, system
 ,
 }:
 let
-  mkHost = hostname: modules: {
-    nixosConfiguration = dotfiles.nixosConfigurations.${hostname}.extendModules {
+
+  mkNixOS =
+    modules:
+    inputs.dotfiles.nixosConfigurations.${hostname}.extendModules {
       inherit modules;
     };
-    deployNode = {
-      # inherit hostname;
-      hostname = "192.168.178.101";
-      profiles.system = {
-        user = "root";
-        sshUser = "deploy";
-        path = deploy-rs.lib.${platforms.${hostname}}.activate.nixos self.nixosConfigurations.${hostname};
-      };
-    };
+
+  # mkNode = ipaddress: {
+  #   hostname = ipaddress;
+  #   profiles.system = {
+  #     user = "root";
+  #     sshUser = "deploy";
+  #     path = inputs.deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostname};
+  #   };
+  # };
+  #
+  systemProfile = {
+    user = "root";
+    sshUser = "deploy";
+    path = inputs.deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostname};
   };
 
-  mkProfile =
-    { hostname
-    , user
+  mkAppProfile =
+    { user
     , package
     , sshUser ? "deploy"
     , script ? "./bin/start"
     , profilePath ? null
     ,
     }:
-    let
-      system = platforms.${hostname};
-    in
     {
       inherit user;
       inherit sshUser;
-      path = deploy-rs.lib.${system}.activate.custom package script;
+      path = inputs.deploy-rs.lib.${system}.activate.custom package script;
       remoteBuild = system != "x86_64-linux";
     }
     // (if profilePath != null then { inherit profilePath; } else { });
+
+  mkNode =
+    { hostname
+    , profiles
+    ,
+    }:
+    {
+      inherit hostname;
+      profiles = {
+        system = systemProfile;
+      }
+      // profiles;
+    };
 in
 {
-  inherit mkHost mkProfile;
+  inherit mkNode mkAppProfile mkNixOS;
 }

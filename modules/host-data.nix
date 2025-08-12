@@ -4,9 +4,5 @@
   logsHoster = "nixberry";
   perhapsHoster = "nixberry";
 
-  hosts = {
-    nixberry = {
-      ip = "192.168.1.10";
-    };
-  };
+  hosts = import ../nodes/host-data.nix;
 }

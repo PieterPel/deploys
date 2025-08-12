@@ -9,6 +9,10 @@
             type = lib.types.str;
             description = "IP address of the host";
           };
+          options.system = lib.mkOption {
+            type = lib.types.str;
+            description = "System of the host";
+          };
         })
       );
       default = { };

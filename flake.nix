@@ -25,29 +25,6 @@
     { self, ... }@inputs:
 
     let
-      platforms = {
-        nixberry = "aarch64-linux";
-      };
-
-      helpers = import ./helpers/system.nix {
-        inherit self platforms;
-        dotfiles = inputs.dotfiles;
-        deploy-rs = inputs.deploy-rs;
-      };
-
-      hosts = {
-        nixberry = helpers.mkHost "nixberry" [
-          ./modules
-        ];
-      };
-
-      perhaps = import ./derivations/perhaps.nix {
-        nixpkgs = inputs.nixpkgs;
-        system = platforms.nixberry;
-        compose2nix = inputs.compose2nix;
-        perhaps = inputs.perhaps;
-      };
-
       preCommitChecks = forAllSystems (system: {
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
@@ -74,25 +51,20 @@
 
       forAllSystems = inputs.nixpkgs.lib.genAttrs supportedSystems;
 
-      lib = inputs.nixpkgs.lib;
+      nixberry = import ./nodes/nixberry.nix {
+        inherit self inputs;
+      };
     in
     {
-      # General setup for all our hosts
-      nixosConfigurations = builtins.mapAttrs (_: host: host.nixosConfiguration) hosts;
-
-      deploy.nodes = lib.recursiveUpdate (builtins.mapAttrs (_: host: host.deployNode) hosts) {
-        nixberry = lib.recursiveUpdate (hosts.nixberry.deployNode) {
-          profiles = {
-            perhaps = helpers.mkProfile {
-              hostname = "nixberry";
-              user = "perhaps";
-              package = perhaps.package;
-            };
-          };
-        };
+      # Construct our flake output for deployment
+      nixosConfigurations = {
+        nixberry = nixberry.nixosConfiguration;
+      };
+      deploy.nodes = {
+        nixberry = nixberry.node;
       };
 
-      # Combine pre-commit and deploy-rs checks
+      # # Combine pre-commit and deploy-rs checks
       checks = inputs.nixpkgs.lib.recursiveUpdate preCommitChecks deployChecks;
 
       # devShells for all systems
@@ -105,7 +77,5 @@
 
       # And add a formatter
       formatter = forAllSystems (system: inputs.nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
-
-      perhaps = perhaps; # NOTE: may as well do this
     };
 }
