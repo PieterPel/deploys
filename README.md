@@ -62,9 +62,8 @@ This includes `nixpkgs-fmt` for formatting, `nil` for Nix language server checks
 
 1.  **Clone the repository.**
 2.  **Ensure Nix and `deploy-rs` are installed.**
-    ```
 4.  **Deploy applications using `deploy-rs`, e.g.:**
     ```bash
-    deploy .#nixberry
+    deploy-rs .#nixberry
     ```
 
