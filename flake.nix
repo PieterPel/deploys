@@ -36,11 +36,19 @@
         };
       });
 
-      deployChecks = builtins.mapAttrs
-        (
-          system: deployLib: deployLib.deployChecks self.deploy
-        )
-        inputs.deploy-rs.lib;
+      lib = inputs.nixpkgs.lib;
+      hostData = import ./nodes/host-data.nix;
+
+      deployChecks = forAllSystems (
+        system:
+        let
+          nodesForSystem = lib.filterAttrs (name: _: hostData.${name}.system == system) self.deploy.nodes;
+        in
+        if nodesForSystem != { } then
+          inputs.deploy-rs.lib.${system}.deployChecks { nodes = nodesForSystem; }
+        else
+          { }
+      );
 
       supportedSystems = [
         "x86_64-linux"
@@ -65,7 +73,7 @@
       };
 
       # # Combine pre-commit and deploy-rs checks
-      checks = inputs.nixpkgs.lib.recursiveUpdate preCommitChecks deployChecks;
+      checks = lib.recursiveUpdate preCommitChecks deployChecks;
 
       # devShells for all systems
       devShells = forAllSystems (system: {

@@ -27,8 +27,11 @@ let
       inherit modules;
     };
 
+  remoteBuild = system != "x86_64-linux";
+
   # Default system profile for deployment
   systemProfile = {
+    inherit remoteBuild;
     user = "root";
     sshUser = "deploy";
     path = deployPkgs.deploy-rs.lib.activate.nixos self.nixosConfigurations.${hostname};
@@ -44,10 +47,8 @@ let
     ,
     }:
     {
-      inherit user;
-      inherit sshUser;
+      inherit user sshUser remoteBuild;
       path = deployPkgs.deploy-rs.lib.activate.custom package script;
-      remoteBuild = system != "x86_64-linux";
     }
     // (if profilePath != null then { inherit profilePath; } else { });
 
@@ -58,7 +59,7 @@ let
     ,
     }:
     {
-      inherit hostname;
+      inherit hostname remoteBuild;
       profiles = {
         system = systemProfile;
       }
