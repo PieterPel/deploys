@@ -1,5 +1,4 @@
 { config, ... }:
-
 {
   services.loki = {
     enable = config.hostLogs;
@@ -21,7 +20,6 @@
         max_chunk_age = "1h";
         chunk_target_size = 999999;
         chunk_retain_period = "30s";
-        max_transfer_retries = 0;
       };
 
       schema_config = {
@@ -30,7 +28,7 @@
             from = "2025-08-08";
             store = "tsdb";
             object_store = "filesystem";
-            schema = "v12";
+            schema = "v13";
             index = {
               prefix = "index_";
               period = "24h";
@@ -40,13 +38,11 @@
       };
 
       storage_config = {
-        boltdb_shipper = {
+        tsdb_shipper = {
           active_index_directory = "/var/lib/loki/tsdb-shipper-active";
           cache_location = "/var/lib/loki/tsdb-shipper-cache";
           cache_ttl = "24h";
-          shared_store = "filesystem";
         };
-
         filesystem = {
           directory = "/var/lib/loki/chunks";
         };
@@ -55,20 +51,15 @@
       limits_config = {
         reject_old_samples = true;
         reject_old_samples_max_age = "168h";
-      };
-
-      chunk_store_config = {
-        max_look_back_period = "0s";
-      };
-
-      table_manager = {
-        retention_deletes_enabled = false;
-        retention_period = "0s";
+        retention_period = "168h"; # 7 days retention
       };
 
       compactor = {
         working_directory = "/var/lib/loki";
-        shared_store = "filesystem";
+        compaction_interval = "10m";
+        retention_enabled = true;
+        retention_delete_delay = "2h";
+        retention_delete_worker_count = 150;
         compactor_ring = {
           kvstore = {
             store = "inmemory";
@@ -76,6 +67,5 @@
         };
       };
     };
-    # user, group, dataDir, extraFlags, (configFile)
   };
 }
