@@ -3,7 +3,9 @@
   services.loki = {
     enable = config.hostLogs;
     configuration = {
-      server.http_listen_port = config.lokiListenPort;
+      server = {
+        http_listen_port = config.lokiListenPort;
+      };
       auth_enabled = false;
 
       ingester = {
