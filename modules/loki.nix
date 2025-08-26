@@ -60,6 +60,14 @@
         retention_enabled = true;
         retention_delete_delay = "2h";
         retention_delete_worker_count = 150;
+
+        delete_request_store = {
+          store = "boltdb";
+          boltdb = {
+            directory = "/var/lib/loki/compactor-delete-requests";
+          };
+        };
+
         compactor_ring = {
           kvstore = {
             store = "inmemory";
