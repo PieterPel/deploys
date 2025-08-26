@@ -39,16 +39,16 @@
         ];
       };
 
-      # storage_config = {
-      #   tsdb_shipper = {
-      #     active_index_directory = "/var/lib/loki/tsdb-shipper-active";
-      #     cache_location = "/var/lib/loki/tsdb-shipper-cache";
-      #     cache_ttl = "24h";
-      #   };
-      #   filesystem = {
-      #     directory = "/var/lib/loki/chunks";
-      #   };
-      # };
+      storage_config = {
+        tsdb_shipper = {
+          active_index_directory = "/var/lib/loki/tsdb-shipper-active";
+          cache_location = "/var/lib/loki/tsdb-shipper-cache";
+          cache_ttl = "24h";
+        };
+        filesystem = {
+          directory = "/var/lib/loki/chunks";
+        };
+      };
       #
       # limits_config = {
       #   reject_old_samples = true;
